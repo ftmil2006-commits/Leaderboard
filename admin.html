@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Admin Panel</h1>
+
+<div class="card">
+  <input type="file" id="file" accept=".xlsx">
+  <button onclick="upload()">Upload Results</button>
+  <p id="msg"></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script>
+function upload() {
+  const f = document.getElementById("file").files[0];
+  if (!f) return alert("Upload XLSX");
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, { type: "binary" });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(sheet);
+
+    localStorage.setItem("event_data", JSON.stringify(data));
+    msg.innerText = "✅ Results uploaded successfully";
+  };
+  reader.readAsBinaryString(f);
+}
+</script>
+
+</body>
+</html>
