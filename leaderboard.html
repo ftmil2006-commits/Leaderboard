@@ -1,143 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Leaderboard</title>
-
-<style>
-body {
-  font-family: "Segoe UI", sans-serif;
-  background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
-  color: white;
-  text-align: center;
-  padding: 30px;
-  margin: 0;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 30px;
-}
-
-.club-logo { width: 90px; }
-
-.club-text h1 { margin: 0; font-size: 26px; }
-.club-text h3 { margin: 0; font-size: 15px; opacity: 0.9; }
-
-#search {
-  padding: 12px;
-  width: 90%;
-  max-width: 420px;
-  border-radius: 10px;
-  border: none;
-  font-size: 16px;
-  margin-bottom: 20px;
-}
-
-.card {
-  background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(10px);
-  padding: 20px;
-  border-radius: 16px;
-  max-width: 800px;
-  margin: auto;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
-  padding: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
-.gold { background: rgba(255,215,0,0.25); }
-.silver { background: rgba(192,192,192,0.25); }
-.bronze { background: rgba(205,127,50,0.25); }
-</style>
-</head>
-
-<body>
-
-<div class="header">
-  <img src="club-logo.jpg" class="club-logo">
-  <div class="club-text">
-    <h1>Compex Coders Club</h1>
-    <h3>Computer Science Department</h3>
-  </div>
-</div>
-
-<h2>🏆 Leaderboard</h2>
-
-<input id="search" placeholder="🔍 Search group name..." onkeyup="render()">
-
-<div class="card">
-  <table>
-    <thead>
-      <tr>
-        <th>Rank</th>
-        <th>Group</th>
-        <th>Achievement</th>
-      </tr>
-    </thead>
-    <tbody id="board">
-      <tr><td colspan="3">Loading…</td></tr>
-    </tbody>
-  </table>
-</div>
-
 <script>
-let data = [];
+const params = new URLSearchParams(window.location.search);
+const group = params.get("group");
+const card = document.getElementById("card");
 
-fetch("event_data.json")
-  .then(res => {
-    if (!res.ok) throw new Error("Fetch failed");
-    return res.json();
-  })
-  .then(json => {
-    data = json;
-    render();
-  })
-  .catch(() => {
-    document.getElementById("board").innerHTML =
-      `<tr><td colspan="3">❌ Failed to load leaderboard</td></tr>`;
-  });
-
-function render() {
-  const q = document.getElementById("search").value.toLowerCase();
-  const board = document.getElementById("board");
-  board.innerHTML = "";
-
-  data
-    .filter(r => (r.group_name || r.team_name).toLowerCase().includes(q))
-    .sort((a,b) => a.rank - b.rank)
-    .forEach(r => {
-      const tr = document.createElement("tr");
-
-      if (r.rank === 1) tr.classList.add("gold");
-      if (r.rank === 2) tr.classList.add("silver");
-      if (r.rank === 3) tr.classList.add("bronze");
-
-      tr.innerHTML = `
-        <td>${r.rank}</td>
-        <td>
-          <a href="badge.html?group=${encodeURIComponent(r.group_name || r.team_name)}"
-             style="color:#00e6ff;font-weight:600;text-decoration:none;">
-            ${r.group_name || r.team_name}
-          </a>
-        </td>
-        <td>${r.badge}</td>
-      `;
-      board.appendChild(tr);
+if (!group) {
+  card.innerHTML = "❗ Please open this page from the leaderboard.";
+} else {
+  fetch("event_data.json")
+    .then(res => {
+      if (!res.ok) throw new Error("JSON not found");
+      return res.json();
+    })
+    .then(data => loadBadge(data))
+    .catch(() => {
+      card.innerHTML = "❌ Failed to load event data";
     });
 }
-</script>
 
-</body>
-</html>
+function loadBadge(data) {
+  const t = data.find(x => x.group_name === group);
+
+  if (!t) {
+    card.innerHTML = "❌ Group not found";
+    return;
+  }
+
+  const membersHTML = `
+    <div class="members">
+      <p><strong>Members</strong></p>
+      <ul>
+        ${t.members.split(",").map(m => `<li>• ${m.trim()}</li>`).join("")}
+      </ul>
+    </div>
+  `;
+
+  card.innerHTML = `
+    <h2>${t.group_name}</h2>
+    <img src="${getBadgeImage(t.badge)}" class="badge-img">
+    <p><strong>${t.badge}</strong></p>
+    ${membersHTML}
+    <p>📸 Screenshot & share</p>
+  `;
+
+  if (t.rank <= 3) launchConfetti();
+}
+
+function getBadgeImage(badge) {
+  badge = badge.toUpperCase();
+  if (badge === "WINNER") return "winner.png";
+  if (badge === "SECOND") return "second.png";
+  if (badge === "THIRD") return "third.png";
+  return "participant.png";
+}
+</script>
