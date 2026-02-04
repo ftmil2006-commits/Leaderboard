@@ -1,32 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" href="style.css">
+  <title>Leaderboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<h1>🏆 Leaderboard</h1>
+<!-- HEADER WITH LOGO -->
+<div class="header">
+  <img src="club-logo.png" class="club-logo" alt="Compex Coders Club">
+  <div class="club-text">
+    <h1>Compex Coders Club</h1>
+    <h3>Computer Science Department</h3>
+  </div>
+</div>
+
+<h2>🏆 Leaderboard</h2>
 
 <div class="card">
-<table>
-<tr><th>Rank</th><th>Team</th><th>Badge</th></tr>
-</table>
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Group Name</th>
+        <th>Achievement</th>
+      </tr>
+    </thead>
+    <tbody id="board">
+      <!-- Dynamic rows -->
+    </tbody>
+  </table>
 </div>
 
 <script>
 const data = JSON.parse(localStorage.getItem("event_data") || "[]");
 
-const table = document.querySelector("table");
+const board = document.getElementById("board");
+
+// sort by rank
 data
-  .sort((a,b) => a.rank - b.rank)
-  .slice(0, 10)
+  .sort((a, b) => a.rank - b.rank)
+  .slice(0, 10) // top 10
   .forEach(r => {
-    table.innerHTML += `
-      <tr>
-        <td>${r.rank}</td>
-        <td>${r.team_name}</td>
-        <td>${r.badge}</td>
-      </tr>`;
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${r.rank}</td>
+      <td>${r.group_name || r.team_name}</td>
+      <td>${r.badge}</td>
+    `;
+    board.appendChild(row);
   });
 </script>
 
