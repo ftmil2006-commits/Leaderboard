@@ -50,21 +50,19 @@ body {
   margin: 15px 0;
 }
 
-/* MEMBERS LIST */
+/* MEMBERS */
 .members {
   margin-top: 15px;
 }
-
 .members ul {
   list-style: none;
   padding: 0;
 }
-
 .members li {
   margin: 4px 0;
 }
 
-/* BUTTONS */
+/* BUTTON */
 button {
   padding: 10px 18px;
   margin: 8px;
@@ -74,7 +72,6 @@ button {
   font-weight: bold;
   cursor: pointer;
 }
-
 .download { background: #00e6ff; }
 
 /* CONFETTI */
@@ -85,7 +82,6 @@ button {
   top: -10px;
   animation: fall 3s linear infinite;
 }
-
 @keyframes fall {
   to { transform: translateY(110vh) rotate(360deg); }
 }
@@ -121,6 +117,7 @@ const group = params.get("group");
 const card = document.getElementById("card");
 
 if (group) loadBadge(group);
+else card.innerHTML = "❗ Please open this page from the leaderboard.";
 
 function loadBadge(name) {
   const t = data.find(x => (x.group_name || x.team_name) === name);
@@ -130,31 +127,36 @@ function loadBadge(name) {
     return;
   }
 
-  const membersHTML = t.members
-    ? `
-      <div class="members">
-        <p><strong>Members</strong></p>
-        <ul>
-          ${t.members.split(",").map(m => `<li>• ${m.trim()}</li>`).join("")}
-        </ul>
-      </div>
-    `
-    : "";
+  const membersHTML = t.members ? `
+    <div class="members">
+      <p><strong>Members</strong></p>
+      <ul>
+        ${t.members.split(",").map(m => `<li>• ${m.trim()}</li>`).join("")}
+      </ul>
+    </div>
+  ` : "";
 
   card.innerHTML = `
     <h2>${t.group_name || t.team_name}</h2>
-    <img src="${t.badge.toLowerCase()}.png" class="badge-img" id="badgeImg">
+    <img src="${getBadgeImage(t.badge)}" class="badge-img" id="badgeImg">
     <p><strong>${t.badge}</strong></p>
-
     ${membersHTML}
-
     <button class="download" onclick="downloadBadge()">⬇ Download Badge</button>
     <p>📸 Screenshot & share</p>
   `;
 
-  if (t.badge === "WINNER" || t.badge === "SECOND") {
+  if (t.badge.trim().toUpperCase() === "WINNER" ||
+      t.badge.trim().toUpperCase() === "SECOND") {
     launchConfetti();
   }
+}
+
+/* BADGE IMAGE MAPPING (FIX) */
+function getBadgeImage(badge) {
+  badge = badge.trim().toUpperCase();
+  if (badge === "WINNER") return "winner.png";
+  if (badge === "SECOND") return "second.png";
+  return "participant.png";
 }
 
 /* CONFETTI */
@@ -170,7 +172,7 @@ function launchConfetti() {
   }
 }
 
-/* DOWNLOAD BADGE IMAGE */
+/* DOWNLOAD */
 function downloadBadge() {
   const img = document.getElementById("badgeImg");
   const a = document.createElement("a");
