@@ -14,7 +14,6 @@ body {
   margin: 0;
 }
 
-/* HEADER */
 .header {
   display: flex;
   align-items: center;
@@ -28,7 +27,6 @@ body {
 .club-text h1 { margin: 0; font-size: 26px; }
 .club-text h3 { margin: 0; font-size: 15px; opacity: 0.9; }
 
-/* CARD */
 .card {
   background: rgba(255,255,255,0.12);
   backdrop-filter: blur(10px);
@@ -45,24 +43,11 @@ body {
   to { transform: scale(1); opacity: 1 }
 }
 
-.badge-img {
-  width: 260px;
-  margin: 15px 0;
-}
+.badge-img { width: 260px; margin: 15px 0; }
 
-/* MEMBERS */
-.members {
-  margin-top: 15px;
-}
-.members ul {
-  list-style: none;
-  padding: 0;
-}
-.members li {
-  margin: 4px 0;
-}
+.members ul { list-style: none; padding: 0; }
+.members li { margin: 4px 0; }
 
-/* BUTTON */
 button {
   padding: 10px 18px;
   margin: 8px;
@@ -72,9 +57,9 @@ button {
   font-weight: bold;
   cursor: pointer;
 }
+
 .download { background: #00e6ff; }
 
-/* CONFETTI */
 .confetti {
   position: fixed;
   width: 8px;
@@ -82,22 +67,17 @@ button {
   top: -10px;
   animation: fall 3s linear infinite;
 }
+
 @keyframes fall {
   to { transform: translateY(110vh) rotate(360deg); }
-}
-
-/* MOBILE */
-@media (max-width: 600px) {
-  .header { flex-direction: column; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
-  <img src="club-logo.jpg" class="club-logo" alt="Club Logo">
+  <img src="club-logo.jpg" class="club-logo">
   <div class="club-text">
     <h1>Compex Coders Club</h1>
     <h3>Computer Science Department</h3>
@@ -118,25 +98,16 @@ const card = document.getElementById("card");
 if (!group) {
   card.innerHTML = "❗ Please open this page from the leaderboard.";
 } else {
-  loadData();
-}
-
-async function loadData() {
-  try {
-    const res = await fetch("event_data.json");
-    const data = await res.json();
-    loadBadge(data);
-  } catch (e) {
-    card.innerHTML = "❌ Failed to load event data.";
-  }
+  fetch("event_data.json")
+    .then(res => res.json())
+    .then(data => loadBadge(data))
+    .catch(() => {
+      card.innerHTML = "❌ Failed to load event data";
+    });
 }
 
 function loadBadge(data) {
-  const name = decodeURIComponent(group).toLowerCase();
-
-  const t = data.find(x =>
-    (x.group_name || x.team_name).toLowerCase() === name
-  );
+  const t = data.find(x => (x.group_name || x.team_name) === group);
 
   if (!t) {
     card.innerHTML = "❌ Group not found";
@@ -154,43 +125,39 @@ function loadBadge(data) {
 
   card.innerHTML = `
     <h2>${t.group_name || t.team_name}</h2>
-    <img src="${getBadgeImage(t.badge)}" class="badge-img" id="badgeImg">
+    <img src="${getBadgeImage(t.badge)}" class="badge-img">
     <p><strong>${t.badge}</strong></p>
     ${membersHTML}
     <button class="download" onclick="downloadBadge()">⬇ Download Badge</button>
     <p>📸 Screenshot & share</p>
   `;
 
-  if (["WINNER","SECOND","THIRD"].includes(t.badge.trim().toUpperCase())) {
+  if (["WINNER", "SECOND", "THIRD"].includes(t.badge.toUpperCase())) {
     launchConfetti();
   }
 }
 
-/* BADGE IMAGE MAP */
 function getBadgeImage(badge) {
   badge = badge.trim().toUpperCase();
   if (badge === "WINNER") return "winner.png";
   if (badge === "SECOND") return "second.png";
-  if (badge === "THIRD" || badge === "3RD") return "third.png";
+  if (badge === "THIRD") return "third.png";
   return "participant.png";
 }
 
-/* CONFETTI */
 function launchConfetti() {
   for (let i = 0; i < 40; i++) {
     const c = document.createElement("div");
     c.className = "confetti";
     c.style.left = Math.random() * 100 + "vw";
     c.style.background = `hsl(${Math.random()*360},100%,60%)`;
-    c.style.animationDelay = Math.random() * 2 + "s";
     document.body.appendChild(c);
     setTimeout(() => c.remove(), 3000);
   }
 }
 
-/* DOWNLOAD */
 function downloadBadge() {
-  const img = document.getElementById("badgeImg");
+  const img = document.querySelector(".badge-img");
   const a = document.createElement("a");
   a.href = img.src;
   a.download = "badge.png";
