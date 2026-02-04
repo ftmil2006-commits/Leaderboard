@@ -106,7 +106,7 @@ fetch("event_data.json")
   })
   .catch(() => {
     document.getElementById("board").innerHTML =
-      <tr><td colspan="3">❌ Failed to load leaderboard</td></tr>;
+      `<tr><td colspan="3">❌ Failed to load leaderboard</td></tr>`;
   });
 
 function render() {
@@ -114,28 +114,39 @@ function render() {
   const board = document.getElementById("board");
   board.innerHTML = "";
 
-  data
-    .filter(r => (r.group_name || r.team_name).toLowerCase().includes(q))
-    .sort((a,b) => a.rank - b.rank)
-    .forEach(r => {
-      const tr = document.createElement("tr");
+  const list = data
+    .filter(r =>
+      (r.group_name || r.team_name || "")
+        .toLowerCase()
+        .includes(q)
+    )
+    .sort((a, b) => a.rank - b.rank);
 
-      if (r.rank === 1) tr.classList.add("gold");
-      if (r.rank === 2) tr.classList.add("silver");
-      if (r.rank === 3) tr.classList.add("bronze");
+  if (!list.length) {
+    board.innerHTML =
+      `<tr><td colspan="3">❗ No results found</td></tr>`;
+    return;
+  }
 
-      tr.innerHTML = `
-        <td>${r.rank}</td>
-        <td>
-          <a href="badge.html?group=${encodeURIComponent(r.group_name || r.team_name)}"
-             style="color:#00e6ff;font-weight:600;text-decoration:none;">
-            ${r.group_name || r.team_name}
-          </a>
-        </td>
-        <td>${r.badge}</td>
-      `;
-      board.appendChild(tr);
-    });
+  list.forEach(r => {
+    const tr = document.createElement("tr");
+
+    if (r.rank === 1) tr.classList.add("gold");
+    if (r.rank === 2) tr.classList.add("silver");
+    if (r.rank === 3) tr.classList.add("bronze");
+
+    tr.innerHTML = `
+      <td>${r.rank}</td>
+      <td>
+        <a href="badge.html?group=${encodeURIComponent(r.group_name || r.team_name)}"
+           style="color:#00e6ff;font-weight:600;text-decoration:none;">
+          ${r.group_name || r.team_name}
+        </a>
+      </td>
+      <td>${r.badge}</td>
+    `;
+    board.appendChild(tr);
+  });
 }
 </script>
 
