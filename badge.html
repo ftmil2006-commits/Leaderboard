@@ -1,36 +1,173 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Group Badge</title>
+
+<style>
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+  color: white;
+  text-align: center;
+  padding: 30px;
+  margin: 0;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.club-logo { width: 90px; }
+
+.club-text h1 { margin: 0; font-size: 26px; }
+.club-text h3 { margin: 0; font-size: 15px; opacity: 0.9; }
+
+/* CARD */
+.card {
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 16px;
+  max-width: 420px;
+  margin: auto;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  animation: pop 0.5s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(0.9); opacity: 0 }
+  to { transform: scale(1); opacity: 1 }
+}
+
+.badge-img {
+  width: 260px;
+  margin: 15px 0;
+}
+
+/* BUTTONS */
+button {
+  padding: 10px 18px;
+  margin: 8px;
+  border-radius: 8px;
+  border: none;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.download { background: #00e6ff; }
+.pdf { background: #00ff9c; }
+
+/* CONFETTI */
+.confetti {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  top: -10px;
+  animation: fall 3s linear infinite;
+}
+
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(360deg); }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .header { flex-direction: column; }
+}
+</style>
 </head>
+
 <body>
 
-<h1>🎖️ Get Your Badge</h1>
+<!-- HEADER -->
+<div class="header">
+  <img src="club-logo.png" class="club-logo">
+  <div class="club-text">
+    <h1>Compex Coders Club</h1>
+    <h3>Computer Science Department</h3>
+  </div>
+</div>
 
-<div class="card">
-  <input id="team" placeholder="Enter Team ID">
-  <button onclick="show()">Get Badge</button>
-  <div id="out"></div>
+<h2>🎖️ Group Achievement</h2>
+
+<div class="card" id="card">
+  <p>Loading badge…</p>
 </div>
 
 <script>
 const data = JSON.parse(localStorage.getItem("event_data") || "[]");
+const params = new URLSearchParams(window.location.search);
+const group = params.get("group");
+const card = document.getElementById("card");
 
-function show() {
-  const id = team.value.toUpperCase();
-  const t = data.find(x => x.team_id === id);
+if (group) loadBadge(group);
 
+function loadBadge(name) {
+  const t = data.find(x => (x.group_name || x.team_name) === name);
   if (!t) {
-    out.innerHTML = "❌ Team not found";
+    card.innerHTML = "❌ Group not found";
     return;
   }
 
-  out.innerHTML = `
-    <h2>${t.team_name}</h2>
-    <img src="${t.badge.toLowerCase()}.png" width="260">
-    <p>${t.badge} BADGE</p>
+  card.innerHTML = `
+    <h2>${t.group_name || t.team_name}</h2>
+    <img src="${t.badge.toLowerCase()}.png" class="badge-img" id="badgeImg">
+    <p><strong>${t.badge}</strong></p>
+
+    <button class="download" onclick="downloadBadge()">⬇ Download Badge</button>
+    <button class="pdf" onclick="downloadPDF()">📄 Certificate</button>
     <p>📸 Screenshot & share</p>
   `;
+
+  if (t.badge === "WINNER" || t.badge === "SECOND") {
+    launchConfetti();
+  }
+}
+
+/* CONFETTI */
+function launchConfetti() {
+  for (let i = 0; i < 40; i++) {
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.background = `hsl(${Math.random()*360},100%,60%)`;
+    c.style.animationDelay = Math.random() * 2 + "s";
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3000);
+  }
+}
+
+/* DOWNLOAD BADGE IMAGE */
+function downloadBadge() {
+  const img = document.getElementById("badgeImg");
+  const a = document.createElement("a");
+  a.href = img.src;
+  a.download = "badge.png";
+  a.click();
+}
+
+/* DOWNLOAD CERTIFICATE PDF */
+function downloadPDF() {
+  const w = window.open("", "_blank");
+  w.document.write(`
+    <h2 style="text-align:center">Certificate of Achievement</h2>
+    <p style="text-align:center">
+      This certifies that<br><br>
+      <strong>${group}</strong><br><br>
+      has successfully participated in the<br>
+      <strong>CS Department Treasure Hunt</strong><br><br>
+      Organized by<br>
+      <strong>Compex Coders Club</strong>
+    </p>
+  `);
+  w.print();
 }
 </script>
 
