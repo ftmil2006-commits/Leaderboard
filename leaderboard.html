@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>🏆 Leaderboard</h1>
+
+<div class="card">
+<table>
+<tr><th>Rank</th><th>Team</th><th>Badge</th></tr>
+</table>
+</div>
+
+<script>
+const data = JSON.parse(localStorage.getItem("event_data") || "[]");
+
+const table = document.querySelector("table");
+data
+  .sort((a,b) => a.rank - b.rank)
+  .slice(0, 10)
+  .forEach(r => {
+    table.innerHTML += `
+      <tr>
+        <td>${r.rank}</td>
+        <td>${r.team_name}</td>
+        <td>${r.badge}</td>
+      </tr>`;
+  });
+</script>
+
+</body>
+</html>
