@@ -176,7 +176,12 @@ function render() {
 
       tr.innerHTML = `
         <td>${r.rank}</td>
-        <td>${r.group_name || r.team_name}</td>
+        <td>
+          <a href="badge.html?group=${encodeURIComponent(r.group_name || r.team_name)}"
+             style="color:#00e6ff; text-decoration:none; font-weight:600;">
+            ${r.group_name || r.team_name}
+          </a>
+        </td>
         <td>${r.badge}</td>
       `;
       board.appendChild(tr);
