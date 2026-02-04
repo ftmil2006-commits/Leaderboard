@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>🎖️ Get Your Badge</h1>
+
+<div class="card">
+  <input id="team" placeholder="Enter Team ID">
+  <button onclick="show()">Get Badge</button>
+  <div id="out"></div>
+</div>
+
+<script>
+const data = JSON.parse(localStorage.getItem("event_data") || "[]");
+
+function show() {
+  const id = team.value.toUpperCase();
+  const t = data.find(x => x.team_id === id);
+
+  if (!t) {
+    out.innerHTML = "❌ Team not found";
+    return;
+  }
+
+  out.innerHTML = `
+    <h2>${t.team_name}</h2>
+    <img src="${t.badge.toLowerCase()}.png" width="260">
+    <p>${t.badge} BADGE</p>
+    <p>📸 Screenshot & share</p>
+  `;
+}
+</script>
+
+</body>
+</html>
