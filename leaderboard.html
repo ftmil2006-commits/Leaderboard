@@ -24,9 +24,7 @@ body {
   margin-bottom: 30px;
 }
 
-.club-logo {
-  width: 90px;
-}
+.club-logo { width: 90px; }
 
 .club-text h1 {
   margin: 0;
@@ -37,7 +35,6 @@ body {
 .club-text h3 {
   margin: 0;
   font-size: 15px;
-  font-weight: normal;
   opacity: 0.9;
 }
 
@@ -74,10 +71,6 @@ th, td {
   border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 
-th {
-  cursor: pointer;
-}
-
 tr:hover {
   background: rgba(255,255,255,0.12);
 }
@@ -99,9 +92,7 @@ tr:hover {
 
 /* ===== MOBILE ===== */
 @media (max-width: 600px) {
-  .header {
-    flex-direction: column;
-  }
+  .header { flex-direction: column; }
 }
 </style>
 </head>
@@ -125,8 +116,8 @@ tr:hover {
   <table>
     <thead>
       <tr>
-        <th onclick="setSort('rank')">Rank ⬍</th>
-        <th onclick="setSort('name')">Group ⬍</th>
+        <th>Rank</th>
+        <th>Group</th>
         <th>Achievement</th>
       </tr>
     </thead>
@@ -135,13 +126,19 @@ tr:hover {
 </div>
 
 <script>
-let data = JSON.parse(localStorage.getItem("event_data") || "[]");
+let data = [];
 let sortMode = "rank";
 
-function setSort(mode) {
-  sortMode = mode;
-  render();
-}
+fetch("event_data.json")
+  .then(res => res.json())
+  .then(json => {
+    data = json;
+    render();
+  })
+  .catch(() => {
+    document.getElementById("board").innerHTML =
+      "<tr><td colspan='3'>❌ Failed to load leaderboard</td></tr>";
+  });
 
 function render() {
   const q = document.getElementById("search").value.toLowerCase();
@@ -150,22 +147,11 @@ function render() {
 
   let list = [...data];
 
-  // sort
-  if (sortMode === "rank") {
-    list.sort((a,b) => a.rank - b.rank);
-  } else {
-    list.sort((a,b) =>
-      (a.group_name || a.team_name)
-        .localeCompare(b.group_name || b.team_name)
-    );
-  }
-
-  // filter + render
   list
     .filter(r =>
       (r.group_name || r.team_name).toLowerCase().includes(q)
     )
-    .slice(0, 20)
+    .sort((a,b) => a.rank - b.rank)
     .forEach(r => {
       const tr = document.createElement("tr");
       tr.classList.add("fade-in");
@@ -178,7 +164,7 @@ function render() {
         <td>${r.rank}</td>
         <td>
           <a href="badge.html?group=${encodeURIComponent(r.group_name || r.team_name)}"
-             style="color:#00e6ff; text-decoration:none; font-weight:600;">
+             style="color:#00e6ff; font-weight:600; text-decoration:none;">
             ${r.group_name || r.team_name}
           </a>
         </td>
@@ -187,8 +173,6 @@ function render() {
       board.appendChild(tr);
     });
 }
-
-render();
 </script>
 
 </body>
