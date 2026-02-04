@@ -97,7 +97,7 @@ button {
 
 <!-- HEADER -->
 <div class="header">
-  <img src="club-logo.jpg" class="club-logo">
+  <img src="club-logo.jpg" class="club-logo" alt="Club Logo">
   <div class="club-text">
     <h1>Compex Coders Club</h1>
     <h3>Computer Science Department</h3>
@@ -111,16 +111,32 @@ button {
 </div>
 
 <script>
-const data = JSON.parse(localStorage.getItem("event_data") || "[]");
 const params = new URLSearchParams(window.location.search);
 const group = params.get("group");
 const card = document.getElementById("card");
 
-if (group) loadBadge(group);
-else card.innerHTML = "❗ Please open this page from the leaderboard.";
+if (!group) {
+  card.innerHTML = "❗ Please open this page from the leaderboard.";
+} else {
+  loadData();
+}
 
-function loadBadge(name) {
-  const t = data.find(x => (x.group_name || x.team_name) === name);
+async function loadData() {
+  try {
+    const res = await fetch("event_data.json");
+    const data = await res.json();
+    loadBadge(data);
+  } catch (e) {
+    card.innerHTML = "❌ Failed to load event data.";
+  }
+}
+
+function loadBadge(data) {
+  const name = decodeURIComponent(group).toLowerCase();
+
+  const t = data.find(x =>
+    (x.group_name || x.team_name).toLowerCase() === name
+  );
 
   if (!t) {
     card.innerHTML = "❌ Group not found";
@@ -145,17 +161,17 @@ function loadBadge(name) {
     <p>📸 Screenshot & share</p>
   `;
 
-  if (t.badge.trim().toUpperCase() === "WINNER" ||
-      t.badge.trim().toUpperCase() === "SECOND") {
+  if (["WINNER","SECOND","THIRD"].includes(t.badge.trim().toUpperCase())) {
     launchConfetti();
   }
 }
 
-/* BADGE IMAGE MAPPING (FIX) */
+/* BADGE IMAGE MAP */
 function getBadgeImage(badge) {
   badge = badge.trim().toUpperCase();
   if (badge === "WINNER") return "winner.png";
   if (badge === "SECOND") return "second.png";
+  if (badge === "THIRD" || badge === "3RD") return "third.png";
   return "participant.png";
 }
 
