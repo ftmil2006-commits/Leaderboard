@@ -153,22 +153,7 @@ function downloadBadge() {
   a.click();
 }
 
-/* DOWNLOAD CERTIFICATE PDF */
-function downloadPDF() {
-  const w = window.open("", "_blank");
-  w.document.write(`
-    <h2 style="text-align:center">Certificate of Achievement</h2>
-    <p style="text-align:center">
-      This certifies that<br><br>
-      <strong>${group}</strong><br><br>
-      has successfully participated in the<br>
-      <strong>CS Department Treasure Hunt</strong><br><br>
-      Organized by<br>
-      <strong>Compex Coders Club</strong>
-    </p>
-  `);
-  w.print();
-}
+
 </script>
 
 </body>
