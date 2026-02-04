@@ -50,6 +50,20 @@ body {
   margin: 15px 0;
 }
 
+/* MEMBERS LIST */
+.members {
+  margin-top: 15px;
+}
+
+.members ul {
+  list-style: none;
+  padding: 0;
+}
+
+.members li {
+  margin: 4px 0;
+}
+
 /* BUTTONS */
 button {
   padding: 10px 18px;
@@ -62,7 +76,6 @@ button {
 }
 
 .download { background: #00e6ff; }
-.pdf { background: #00ff9c; }
 
 /* CONFETTI */
 .confetti {
@@ -111,18 +124,31 @@ if (group) loadBadge(group);
 
 function loadBadge(name) {
   const t = data.find(x => (x.group_name || x.team_name) === name);
+
   if (!t) {
     card.innerHTML = "❌ Group not found";
     return;
   }
+
+  const membersHTML = t.members
+    ? `
+      <div class="members">
+        <p><strong>Members</strong></p>
+        <ul>
+          ${t.members.split(",").map(m => `<li>• ${m.trim()}</li>`).join("")}
+        </ul>
+      </div>
+    `
+    : "";
 
   card.innerHTML = `
     <h2>${t.group_name || t.team_name}</h2>
     <img src="${t.badge.toLowerCase()}.png" class="badge-img" id="badgeImg">
     <p><strong>${t.badge}</strong></p>
 
+    ${membersHTML}
+
     <button class="download" onclick="downloadBadge()">⬇ Download Badge</button>
-    <button class="pdf" onclick="downloadPDF()">📄 Certificate</button>
     <p>📸 Screenshot & share</p>
   `;
 
@@ -152,8 +178,6 @@ function downloadBadge() {
   a.download = "badge.png";
   a.click();
 }
-
-
 </script>
 
 </body>
